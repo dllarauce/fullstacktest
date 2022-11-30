@@ -1,0 +1,11 @@
+Solución para lematizar y radicalizar las palabras y clasificarlas de acuerdo a los siguientes pilares: Agilidad, Amabilidad, Asesoría
+
+Se pueden usar herramientas como Natural Language Toolkit (NLTK) para lematizar y radicalizar las palabras. Esta herramienta permite realizar tareas de procesamiento de lenguaje natural, como lematizar y radicalizar. Una vez realizadas estas tareas, se pueden clasificar las palabras usando un algoritmo de clasificación, como el algoritmo Naive Bayes o el algoritmo de vecinos más cercanos, para asignarlas a uno de los tres pilares (Agilidad, Amabilidad, Asesoría).
+
+Para lematizar y radicalizar las palabras y clasificarlas de acuerdo a los pilares: Agilidad, Amabilidad, Asesoría, se puede usar una librería de procesamiento de lenguaje natural (NLP) como Spacy para segmentar las palabras en tokens y luego aplicar un algoritmo de clasificación como Naive Bayes o Decision Trees para asignar las palabras a los pilares mencionados.
+
+Se puede usar una herramienta de procesamiento de lenguaje natural como NLTK (Natural Language Toolkit) para lematizar y radicalizar las palabras de los comentarios de los clientes.
+
+NLTK proporciona métodos para lematizar y radicalizar palabras, como lematizar () que le permite lematizar una palabra dada. También tiene una función para tokenizar una cadena de texto en palabras individuales.
+
+Una vez que se haya lematizado y radicalizado cada palabra de un comentario, se pueden clasificar de acuerdo a los pilares especificados (agilidad, amabilidad, asesoría) mediante una etiqueta de clasificación basada en los patrones de palabras y frases detectados.

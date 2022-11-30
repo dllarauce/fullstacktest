@@ -1,0 +1,170 @@
+
+CREATE TABLE sucursal
+(
+  sucursal_id INTEGER PRIMARY KEY,
+  nombre VARCHAR(50) NOT NULL,
+  ciudad VARCHAR(50) NOT NULL,
+  provincia VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE encuestado
+(
+  ci INTEGER PRIMARY KEY,
+  nombre_apellido VARCHAR(50) NOT NULL,
+  sexo VARCHAR(50) NOT NULL,
+  edad INTEGER NOT NULL
+);
+
+CREATE TABLE encuesta
+(
+  encuesta_id INTEGER PRIMARY KEY,
+  pregunta VARCHAR(50) NOT NULL,
+  escala VARCHAR(50) NOT NULL,
+  categoria VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE respuesta
+(
+  respuesta_id INTEGER PRIMARY KEY,
+  encuesta_id INTEGER NOT NULL,
+  sucursal_id INTEGER NOT NULL,
+  ci INTEGER NOT NULL,
+  respuesta VARCHAR(50) NOT NULL,
+  FOREIGN KEY (encuesta_id) REFERENCES encuesta(encuesta_id),
+  FOREIGN KEY (sucursal_id) REFERENCES sucursal(sucursal_id),
+  FOREIGN KEY (ci) REFERENCES encuestado(ci)
+);
+
+CREATE TABLE comentario
+(
+  comentario_id INTEGER PRIMARY KEY,
+  sucursal_id INTEGER NOT NULL,
+  ci INTEGER NOT NULL,
+  comentario VARCHAR(50) NOT NULL,
+  FOREIGN KEY (sucursal_id) REFERENCES sucursal(sucursal_id),
+  FOREIGN KEY (ci) REFERENCES encuestado(ci)
+);
+
+insert
+into
+sucursal
+values
+(1, ‘29 de Mayo', 'Loja', 'Loja'),
+(2, 'Tarqui', 'Pedernales', 'Manabí'),
+(3, 'San Rafael', 'Rumiñahui', 'Pichincha'),
+(4, 'Guasmo', 'Guayaquil', 'Guayas'),
+(5, 'Mena 2', 'Quito', 'Pichincha'),
+(6, 'Quicentro Norte', 'Quito', 'Pichincha');
+
+insert
+into
+encuestado
+values
+(1712345678, 'David Estrada', 'M', 35),
+(0923459824, 'Yolanda Ramos', 'F', 23);
+
+insert
+into
+encuesta
+values
+(1, 'Le despacharon los productos revisando la factura?', 'Si/No', 'Estándares'),
+(2, 'Le entregaron la factura?', 'Si/No', 'Estándares'),
+(3, 'La amabilidad del cajero?', '0-10', 'Satisfacción'),
+(4, 'La satisfacción en general?', '0-10', 'Satisfacción'),
+(5, 'En qué nivel recomendaría a XYZ a amigos o familiares siendo 0 definitivamente no recomendaría y 10 si recomendaría?', '0-10', 'Recomendación'),
+(6, 'Sus observaciones finales, por favor.', 'Abierta', 'Recomendación');
+
+insert
+into
+respuesta
+values
+(1, 1, 1, 1712345678, 'Si'),
+(2, 2, 1, 1712345678, 'Si'),
+(3, 3, 1, 1712345678, '8'),
+(4, 4, 1, 1712345678, '9'),
+(5, 5, 1, 1712345678, '10'),
+(6, 1, 2, 0923459824, 'No'),
+(7, 2, 2, 0923459824, 'No'),
+(8, 3, 2, 0923459824, '7'),
+(9, 4, 2, 0923459824, '6'),
+(10, 5, 2, 0923459824, '5');
+
+insert
+into
+comentario
+values
+(1, 1, 1712345678, 'El servicio fue muy bueno.'),
+(2, 2, 0923459824, 'Demoraron mucho en el despacho.');
+
+
+CREATE VIEW v_satisfaccion AS
+SELECT 
+  sucursal_id, 
+  AVG(respuesta) AS nivel_satisfaccion
+FROM 
+  respuesta 
+WHERE 
+  encuesta_id IN (3, 4) 
+GROUP BY 
+  sucursal_id;
+  
+CREATE VIEW v_recomendacion AS
+SELECT 
+  sucursal_id, 
+  AVG(respuesta) AS porcentaje_recomendacion
+FROM 
+  respuesta 
+WHERE 
+  encuesta_id = 5 
+GROUP BY 
+  sucursal_id;
+  
+CREATE VIEW v_reporte_sucursal AS
+SELECT 
+  s.nombre,
+  s.ciudad,
+  s.provincia,
+  vt.nivel_satisfaccion,
+  vr.porcentaje_recomendacion
+FROM 
+  sucursal s
+INNER JOIN 
+  v_satisfaccion vt ON s.sucursal_id = vt.sucursal_id
+INNER JOIN
+  v_recomendacion vr ON s.sucursal_id = vr.sucursal_id;
+
+CREATE OR REPLACE FUNCTION sp_calcular_porcentaje_rec()
+  RETURNS TABLE (sucursal_id INTEGER, porcentaje_rec INTEGER)
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    r.sucursal_id, 
+    CAST(AVG(r.respuesta) AS INTEGER) AS porcentaje_rec
+  FROM 
+    respuesta r 
+  WHERE 
+    r.encuesta_id = 5 
+  GROUP BY 
+    r.sucursal_id;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION sp_calcular_satisfaccion()
+  RETURNS TABLE (sucursal_id INTEGER, nivel_satisfaccion INTEGER)
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    r.sucursal_id, 
+    CAST(AVG(r.respuesta) AS INTEGER) AS nivel_satisfaccion
+  FROM 
+    respuesta r 
+  WHERE 
+    r.encuesta_id IN (3, 4) 
+  GROUP BY 
+    r.sucursal_id;
+END;
+$$
+LANGUAGE plpgsql;
